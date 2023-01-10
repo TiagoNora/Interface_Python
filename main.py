@@ -1,5 +1,7 @@
+from tkinter import Tk, Tcl, Button, messagebox, PhotoImage
+from tkinter import ttk
 import tkinter as tk
-import messagebox
+#import messagebox
 import requests
 import json
 import numpy as np
@@ -13,21 +15,22 @@ SMALL_FONT = ("Lexend", 10)
 my_list = []
 tempAux = 0
 
-my_list.insert(0, [100, 1])
-my_list.insert(0, [200, 1.5])
-my_list.insert(0, [300, 2])
-my_list.insert(0, [400, 2.5])
-my_list.insert(0, [500, 3])
-my_list.insert(0, [600, 3.5])
-my_list.insert(0, [700, 4])
-my_list.insert(0, [800, 4.5])
-my_list.insert(0, [900, 5])
+#my_list.insert(0, [100, 1])
+#my_list.insert(0, [200, 1.5])
+#my_list.insert(0, [300, 2])
+#my_list.insert(0, [400, 2.5])
+#my_list.insert(0, [500, 3])
+#my_list.insert(0, [600, 3.5])
+#my_list.insert(0, [700, 4])
+#my_list.insert(0, [800, 4.5])
+#my_list.insert(0, [900, 5])
 
 #f = open("calibration.dat", "w")
 #for x in range(len(my_list)):
 #    a = my_list[len(my_list)-x-1]
 #    f.write('' + a[0].__str__() + ' ' + a[1].__str__() + '\n')
 #f.close()
+#my_list.clear();
 
 
 # print(my_list)
@@ -139,7 +142,7 @@ class PageOne(tk.Frame):
                 f = open("calibration.dat", "w")
                 for x in range(len(my_list)):
                     a = my_list[len(my_list)-x-1]
-                    f.write('' + a[0].__str__() + ' ' + a[1].__str__())
+                    f.write('' + a[0].__str__() + ' ' + a[1].__str__()+ '\n')
                 f.close()
             except:
                 print("Erro ao realizar a calibração")
@@ -160,12 +163,13 @@ class PageTwo(tk.Frame):
 
         graph_frame = tk.Frame(self)
         graph_frame.pack(side="bottom")
-
-        file = "calibration.dat"
-        data = np.loadtxt(file)
-        time_ms = data[:, 1]
-        dist_mm = data[:, 0]
-
+        try:
+            file = "calibration.dat"
+            data = np.loadtxt(file)
+            time_ms = data[:, 1]
+            dist_mm = data[:, 0]
+        except:
+            print("Erro a fazer grafico")
 
         self.fig, self.ax = plt.subplots()
         self.fig.set_size_inches(4, 3)
@@ -180,6 +184,7 @@ class PageTwo(tk.Frame):
 
 
         self.calculateValues()
+
 
 
     def calculateValues(self):
