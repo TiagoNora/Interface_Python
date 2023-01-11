@@ -9,6 +9,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from scipy import stats
 import matplotlib.pyplot as plt
 import math as math
+import os
 
 LARGE_FONT = ("Lexend", 15)
 SMALL_FONT = ("Lexend", 10)
@@ -93,7 +94,10 @@ class StartPage(tk.Frame):
     def updateFrameAndShow(self):
         page = self.controller.get_page(PageTwo)
         page.calculateValues()
-        self.controller.show_frame(PageTwo)
+        if page.is_empty():
+            messagebox.showerror("Error", "Não foram introduzidos dados")
+        else:
+            self.controller.show_frame(PageTwo)
 
     def change_label1_text(self):
         try:
@@ -168,6 +172,7 @@ class PageTwo(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.path = "calibration.dat"
         label = tk.Label(self, text="Demonstração de dados", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
         print(my_list)
@@ -176,9 +181,13 @@ class PageTwo(tk.Frame):
         graph_frame.pack(side="top", pady=10, padx=10)
 
         file = "calibration.dat"
-        data = np.loadtxt(file)
-        time_ms = data[:, 1]
-        dist_mm = data[:, 0]
+        if self.is_empty():
+            time_ms = [0]
+            dist_mm = [0]
+        else:
+            data = np.loadtxt(self.path)
+            time_ms = data[:, 1]
+            dist_mm = data[:, 0]
 
         self.fig, self.ax = plt.subplots(figsize=(6, 4))
         self.ax.scatter(time_ms, dist_mm)
@@ -218,10 +227,13 @@ class PageTwo(tk.Frame):
 
     def calculateValues(self):
         self.table.delete(*self.table.get_children())
-        file = "calibration.dat"
-        data = np.loadtxt(file)
-        time_ms = data[:, 1]
-        dist_mm = data[:, 0]
+        if self.is_empty():
+            time_ms = [0]
+            dist_mm = [0]
+        else:
+            data = np.loadtxt(self.path)
+            time_ms = data[:, 1]
+            dist_mm = data[:, 0]
         self.ax.clear()  # clear the existing graph
         self.ax.scatter(time_ms, dist_mm)
         self.ax.plot(time_ms, dist_mm, color="red", linewidth=1)
@@ -302,6 +314,10 @@ class PageTwo(tk.Frame):
         self.table.insert("", "end", values=("Coeficiente de correlação", "r2", "%.3f" % rValue, "-----", "-----"))
         self.table.insert("", "end", values=("Velocidade do som (exp.)", "V_som (m/s)", "%.3f" % vsom, "%.3f" % (2 * stderr), "%.3f" % relStdErr))
         self.table.insert("", "end", values=("Desvio relativo (exactidão)", "\u0394 (%)", "%.3f" % desvRel, "-----", "-----"))
+
+    def is_empty(self):
+        filepath = self.path
+        return os.stat(filepath).st_size == 0
 
 
 app = AplicationVibon()
