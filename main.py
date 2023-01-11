@@ -15,15 +15,15 @@ SMALL_FONT = ("Lexend", 10)
 my_list = []
 tempAux = 0
 
-my_list.insert(0, [100, 1])
-my_list.insert(0, [200, 1.5])
-my_list.insert(0, [300, 2])
-my_list.insert(0, [400, 2.5])
-my_list.insert(0, [500, 3])
-my_list.insert(0, [600, 3.5])
-my_list.insert(0, [700, 4])
-my_list.insert(0, [800, 4.5])
-my_list.insert(0, [900, 5])
+#my_list.insert(0, [100, 1])
+#my_list.insert(0, [200, 1.5])
+#my_list.insert(0, [300, 2])
+#my_list.insert(0, [400, 2.5])
+#my_list.insert(0, [500, 3])
+#my_list.insert(0, [600, 3.5])
+#my_list.insert(0, [700, 4])
+#my_list.insert(0, [800, 4.5])
+#my_list.insert(0, [900, 5])
 
 
 # f = open("calibration.dat", "w")
@@ -100,10 +100,8 @@ class StartPage(tk.Frame):
             response = requests.get('http://192.168.4.1/temperature')
             json_response = response.json()
             temp = json_response["temperature"]
-            print(temp)
             tempAux = temp
-            text = "Temp: " + temp.__str__()
-            self.cont1 += 1
+            text = "Temp: " + temp
             self.label1.config(text=text)
             self.after(5000, self.change_label1_text)
         except:
@@ -159,7 +157,7 @@ class PageOne(tk.Frame):
                 f = open("calibration.dat", "w")
                 for x in range(len(my_list)):
                     a = my_list[len(my_list) - x - 1]
-                    f.write('' + a[0].__str__() + ' ' + a[1].__str__())
+                    f.write('' + a[0].__str__() + ' ' + a[1].__str__() + '\n')
                 f.close()
             except:
                 print("Erro ao realizar a calibração")
