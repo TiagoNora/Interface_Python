@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter import ttk
+
 import messagebox
 import requests
 import json
@@ -23,11 +25,12 @@ my_list.insert(0, [700, 4])
 my_list.insert(0, [800, 4.5])
 my_list.insert(0, [900, 5])
 
-#f = open("calibration.dat", "w")
-#for x in range(len(my_list)):
+
+# f = open("calibration.dat", "w")
+# for x in range(len(my_list)):
 #    a = my_list[len(my_list)-x-1]
 #    f.write('' + a[0].__str__() + ' ' + a[1].__str__() + '\n')
-#f.close()
+# f.close()
 
 
 # print(my_list)
@@ -37,7 +40,7 @@ class AplicationVibon(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.title("Aplicação de Vibon")
-        self.geometry("500x500")
+        self.geometry("1000x800")
         container = tk.Frame(self)
 
         container.pack(side="top", fill="both", expand=True)
@@ -58,11 +61,15 @@ class AplicationVibon(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
 
+    def get_page(self, page_class):
+        return self.frames[page_class]
+
 
 class StartPage(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.controller = controller
         label = tk.Label(self, text="Página Inicial", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
@@ -71,14 +78,22 @@ class StartPage(tk.Frame):
         button.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
         button2 = tk.Button(self, text="Demonstração de dados",
-                            command=lambda: controller.show_frame(PageTwo), font=SMALL_FONT)
+                            command=self.updateFrameAndShow, font=SMALL_FONT)
         button2.place(relx=0.5, rely=0.6, anchor=tk.CENTER)
+
+        button3 = tk.Button(self, text="Sair", command=self.exit, font=SMALL_FONT)
+        button3.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
 
         bottom_frame = tk.Frame(self)
         bottom_frame.pack(side="bottom")
         self.label1 = tk.Label(bottom_frame, text="Temp: ", font=SMALL_FONT)
-        self.label1.grid(row=0, column=0, padx=10, pady=10)
+        self.label1.grid(row=0, column=0, padx=10, pady=80)
         self.change_label1_text()
+
+    def updateFrameAndShow(self):
+        page = self.controller.get_page(PageTwo)
+        page.calculateValues()
+        self.controller.show_frame(PageTwo)
 
     def change_label1_text(self):
         try:
@@ -93,11 +108,15 @@ class StartPage(tk.Frame):
         except:
             print("Erro ao obter temperatura")
 
+    def exit(self):
+        self.quit()
+
 
 class PageOne(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.controller = controller
         label = tk.Label(self, text="Inserção de dados", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
         self.input_label = tk.Label(self, text="Distancia (mm):", font=SMALL_FONT)
@@ -138,7 +157,7 @@ class PageOne(tk.Frame):
                 my_list.insert(0, [input_value, calibration])
                 f = open("calibration.dat", "w")
                 for x in range(len(my_list)):
-                    a = my_list[len(my_list)-x-1]
+                    a = my_list[len(my_list) - x - 1]
                     f.write('' + a[0].__str__() + ' ' + a[1].__str__())
                 f.close()
             except:
@@ -149,44 +168,66 @@ class PageTwo(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        self.controller = controller
         label = tk.Label(self, text="Demonstração de dados", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
         print(my_list)
-        button1 = tk.Button(self, text="Página Inicial",
-                            command=lambda: controller.show_frame(StartPage), font=SMALL_FONT)
-        button1.pack()
-
-        button1.place(relx=0.5, rely=0.9, anchor=tk.CENTER)
 
         graph_frame = tk.Frame(self)
-        graph_frame.pack(side="bottom")
+        graph_frame.pack(side="top", pady=10, padx=10)
 
         file = "calibration.dat"
         data = np.loadtxt(file)
         time_ms = data[:, 1]
         dist_mm = data[:, 0]
 
-
-        self.fig, self.ax = plt.subplots()
-        self.fig.set_size_inches(4, 3)
+        self.fig, self.ax = plt.subplots(figsize=(6, 4))
         self.ax.scatter(time_ms, dist_mm)
-        self.ax.plot(time_ms, dist_mm)
-        self.ax.set(xlabel='X Axis', ylabel='Y Axis', title='Simple Line Plot')
+        self.ax.plot(time_ms, dist_mm, color="red", linewidth=1)
+        self.ax.set(xlabel='Tempo (ms)', ylabel='Distancia (mm)', title='Calibração dos Dados')
 
         # Create the Tkinter Canvas widget that will display the graph
         self.canvas = FigureCanvasTkAgg(self.fig, graph_frame)
-        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        self.canvas.get_tk_widget().pack()
         self.canvas.draw()
 
+        table_frame = tk.Frame(self)
+        table_frame.pack(side="bottom", fill="both", expand=True)
 
-        self.calculateValues()
+        self.table = ttk.Treeview(table_frame, height=7)
+        self.table["columns"] = ("one", "two", "three", "four", "five")
 
+        self.table.heading("one", text="Grandeza")
+        self.table.heading("two", text="Simbolo")
+        self.table.heading("three", text="Valor")
+        self.table.heading("four", text="Incerteza Padrão")
+        self.table.heading("five", text="Incerteza Relativa (%)")
+        self.table.column('#0', width=0, minwidth=0)
+        self.table.pack(pady=10, padx=10)
+
+        self.table.column("one", width=150)
+        self.table.column("two", width=100)
+        self.table.column("three", width=100)
+        self.table.column("four", width=100)
+        self.table.column("five", width=100)
+
+        button1 = tk.Button(self, text="Página Inicial",
+                            command=lambda: controller.show_frame(StartPage), font=SMALL_FONT)
+        button1.pack(pady=10, padx=10)
+
+        button1.place(relx=0.5, rely=0.90, anchor=tk.CENTER)
 
     def calculateValues(self):
+        self.table.delete(*self.table.get_children())
         file = "calibration.dat"
         data = np.loadtxt(file)
         time_ms = data[:, 1]
         dist_mm = data[:, 0]
+        self.ax.clear()  # clear the existing graph
+        self.ax.scatter(time_ms, dist_mm)
+        self.ax.plot(time_ms, dist_mm, color="red", linewidth=1)
+        self.ax.set(xlabel='Tempo (ms)', ylabel='Distancia (mm)', title='Calibração dos Dados')
+        self.canvas.draw()
 
         # Termometro
         theta_1C = tempAux
@@ -255,7 +296,13 @@ class PageTwo(tk.Frame):
         plt.scatter(time_ms, dist_mm, color="black", )
         plt.plot(time_ms, dist_mm, color="blue", linewidth=1)
 
-
+        self.table.insert("", "end", values=("Tempertura ambiente", "\u03B8 (K)", "%.3f" % theta_1K, "%.3f" % uTheta1, "%.3f" % uRelTheta1))
+        self.table.insert("", "end", values=("Velocidade do som (ref.)", "V_ref (m/s)", "%.3f" % vref, "%.3f" % uVref, "%.3f" % uRelVref))
+        self.table.insert("", "end", values=("Declive da reta", "\u03B1 (mm m/s) ", "%.3f" % alpha_1, "%.3f" % stderr, "%.3f" % relStdErr))
+        self.table.insert("", "end", values=("Ordenada na origem", "\u03B2 (mm)", "%.3f" % beta_1, "%.3f" % intErr, "%.3f" % relIntErr))
+        self.table.insert("", "end", values=("Coeficiente de correlação", "r2", "%.3f" % rValue, "-----", "-----"))
+        self.table.insert("", "end", values=("Velocidade do som (exp.)", "V_som (m/s)", "%.3f" % vsom, "%.3f" % (2 * stderr), "%.3f" % relStdErr))
+        self.table.insert("", "end", values=("Desvio relativo (exactidão)", "\u0394 (%)", "%.3f" % desvRel, "-----", "-----"))
 
 
 app = AplicationVibon()
