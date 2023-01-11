@@ -118,15 +118,21 @@ class StartPage(tk.Frame):
 
     def showAlert(self):
         valueAux = 0
+
+        link = 'http://192.168.4.1/hooke?alpha=' + alphaAux.__str__() + '&beta=' + betaAux.__str__()
+        print(alphaAux.__str__())
+        print(betaAux.__str__())
+        print(link)
         try:
-            link = 'http://192.168.4.1/hooke?alpha= + ' + alphaAux + '&beta=' + betaAux
+
             response = requests.get(link)
+
             json_response = response.json()
             hooke = json_response["hooke"]
             valueAux = hooke
         except:
             print("Erro ao obter distancia")
-        msg = 'Distancia obtida (mm): ' + valueAux
+        msg = 'Distancia obtida (mm): ' + valueAux.__str__()
         messagebox.showinfo("Distancia", msg)
 
     def exit(self):
@@ -340,7 +346,9 @@ class PageTwo(tk.Frame):
                           values=("Desvio relativo (exactidão)", "\u0394 (%)", "%.3f" % desvRel, "-----", "-----"))
 
         alphaAux = alpha_1
+        print(alphaAux)
         betaAux = beta_1
+        print(betaAux)
 
     def is_empty(self):
         filepath = self.path
