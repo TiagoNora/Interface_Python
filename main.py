@@ -92,6 +92,11 @@ class StartPage(tk.Frame):
                             command=self.showAlert, font=SMALL_FONT)
         button2.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
 
+        button3 = tk.Button(self, text="Apagar dados recolhidos",
+                            command=self.eraseValues, font=SMALL_FONT)
+        button3.place(relx=0.2, rely=0.7, anchor=tk.CENTER)
+
+
         button3 = tk.Button(self, text="Sair", command=self.exit, font=SMALL_FONT)
         button3.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
 
@@ -121,7 +126,6 @@ class StartPage(tk.Frame):
         except:
             print("Erro ao obter temperatura")
 
-
     def showAlert(self):
         page = self.controller.get_page(StartPage)
         valueAux = 0
@@ -144,6 +148,11 @@ class StartPage(tk.Frame):
         except:
             print("Erro ao obter distancia")
 
+    def eraseValues(self):
+        open('calibration.dat', 'w').close()
+        my_list.clear()
+
+
     def exit(self):
         self.quit()
 
@@ -165,7 +174,7 @@ class PageOne(tk.Frame):
         self.input_text2 = tk.Entry(self)
         self.input_text2.pack()
 
-        button = tk.Button(self, text="Get Value", command=self.get_value, font=SMALL_FONT)
+        button = tk.Button(self, text="Obter um valor", command=self.get_value, font=SMALL_FONT)
         button.pack()
 
         button.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
@@ -180,7 +189,7 @@ class PageOne(tk.Frame):
         # Get the value from the input field
         input_value = self.input_text.get()
         input_value2 = self.input_text2.get()
-        if not input_value:  # If the input field is empty
+        if not input_value and not input_value2:  # If the input field is empty
             messagebox.showerror("Error", "Introduza um valor válido")
         else:
             # print(input_value)  # print the value for testing purposes
@@ -196,8 +205,12 @@ class PageOne(tk.Frame):
                     a = my_list[len(my_list) - x - 1]
                     f.write('' + a[0].__str__() + ' ' + a[1].__str__() + '\n')
                 f.close()
+                #messagebox.showinfo("Sucesso", "Dado obtido com sucesso")
             except:
-                print("Erro ao realizar a calibração")
+                messagebox.showerror("Error", "Erro ao realizar a calibração")
+
+        self.input_text.delete(0, "end")
+        self.input_text2.delete(0, "end")
 
 
 class PageTwo(tk.Frame):
@@ -275,12 +288,11 @@ class PageTwo(tk.Frame):
         self.canvas.draw()
 
         # Termometro
-        theta_1C = page.tempAux
-        print(page.tempAux)
+        theta_1C = float(page.tempAux)
         theta_1K = theta_1C + 273.15
 
-        Rterm = 1
-        aTerm = Rterm / 2
+        Rterm = 0.1
+        aTerm = Rterm / math.sqrt(3)
         uTheta1 = aTerm / math.sqrt(3)
 
         uRelTheta1 = (uTheta1 / theta_1K) * 100
@@ -343,16 +355,16 @@ class PageTwo(tk.Frame):
         plt.plot(time_ms, dist_mm, color="blue", linewidth=1)
 
         self.table.insert("", "end", values=(
-        "Tempertura ambiente", "\u03B8 (K)", "%.3f" % theta_1K, "%.3f" % uTheta1, "%.3f" % uRelTheta1))
+            "Tempertura ambiente", "\u03B8 (K)", "%.3f" % theta_1K, "%.3f" % uTheta1, "%.3f" % uRelTheta1))
         self.table.insert("", "end", values=(
-        "Velocidade do som (ref.)", "V_ref (m/s)", "%.3f" % vref, "%.3f" % uVref, "%.3f" % uRelVref))
+            "Velocidade do som (ref.)", "V_ref (m/s)", "%.3f" % vref, "%.3f" % uVref, "%.3f" % uRelVref))
         self.table.insert("", "end", values=(
-        "Declive da reta", "\u03B1 (mm m/s) ", "%.3f" % alpha_1, "%.3f" % stderr, "%.3f" % relStdErr))
+            "Declive da reta", "\u03B1 (mm m/s) ", "%.3f" % alpha_1, "%.3f" % stderr, "%.3f" % relStdErr))
         self.table.insert("", "end", values=(
-        "Ordenada na origem", "\u03B2 (mm)", "%.3f" % beta_1, "%.3f" % intErr, "%.3f" % relIntErr))
-        self.table.insert("", "end", values=("Coeficiente de correlação", "r2", "%.3f" % rValue, "-----", "-----"))
+            "Ordenada na origem", "\u03B2 (mm)", "%.3f" % beta_1, "%.3f" % intErr, "%.3f" % relIntErr))
+        self.table.insert("", "end", values=("Coeficiente de correlação", "r2", "%.6f" % rValue, "-----", "-----"))
         self.table.insert("", "end", values=(
-        "Velocidade do som (exp.)", "V_som (m/s)", "%.3f" % vsom, "%.3f" % (2 * stderr), "%.3f" % relStdErr))
+            "Velocidade do som (exp.)", "V_som (m/s)", "%.3f" % vsom, "%.3f" % (2 * stderr), "%.3f" % relStdErr))
         self.table.insert("", "end",
                           values=("Desvio relativo (exactidão)", "\u0394 (%)", "%.3f" % desvRel, "-----", "-----"))
 
