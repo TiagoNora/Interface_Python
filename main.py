@@ -292,7 +292,7 @@ class PageTwo(tk.Frame):
         theta_1K = theta_1C + 273.15
 
         Rterm = 0.1
-        aTerm = Rterm / math.sqrt(3)
+        aTerm = Rterm
         uTheta1 = aTerm / math.sqrt(3)
 
         uRelTheta1 = (uTheta1 / theta_1K) * 100
