@@ -14,7 +14,9 @@ import os
 LARGE_FONT = ("Lexend", 15)
 SMALL_FONT = ("Lexend", 10)
 my_list = []
-alphaAux = betaAux = tempAux = 0
+alphaAux = 0
+betaAux = 0
+tempAux = 0
 
 
 # my_list.insert(0, [100, 1])
@@ -72,28 +74,31 @@ class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
+        self.alphaAux = 0
+        self.betaAux = 0
+        self.tempAux = 0
         label = tk.Label(self, text="Calibração do Sonar", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
         button = tk.Button(self, text="Inserção de dados",
                            command=lambda: controller.show_frame(PageOne), font=SMALL_FONT)
-        button.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        button.place(relx=0.5, rely=0.2, anchor=tk.CENTER)
 
         button2 = tk.Button(self, text="Demonstração de dados",
                             command=self.updateFrameAndShow, font=SMALL_FONT)
-        button2.place(relx=0.5, rely=0.6, anchor=tk.CENTER)
+        button2.place(relx=0.5, rely=0.3, anchor=tk.CENTER)
 
         button2 = tk.Button(self, text="Medir distancia",
                             command=self.showAlert, font=SMALL_FONT)
-        button2.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
+        button2.place(relx=0.5, rely=0.4, anchor=tk.CENTER)
 
         button3 = tk.Button(self, text="Sair", command=self.exit, font=SMALL_FONT)
-        button3.place(relx=0.5, rely=0.8, anchor=tk.CENTER)
+        button3.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
 
         bottom_frame = tk.Frame(self)
         bottom_frame.pack(side="bottom")
         self.label1 = tk.Label(bottom_frame, text="Temp: ", font=SMALL_FONT)
-        self.label1.grid(row=0, column=0, padx=10, pady=80)
+        self.label1.grid(row=0, column=0, padx=10, pady=50)
         self.change_label1_text()
 
     def updateFrameAndShow(self):
@@ -117,11 +122,14 @@ class StartPage(tk.Frame):
             print("Erro ao obter temperatura")
 
     def showAlert(self):
+        page = self.controller.get_page(StartPage)
         valueAux = 0
+        alphaAux = page.alphaAux
+        betaAux = page.betaAux
+        print(alphaAux)
+        print(betaAux)
 
         link = 'http://192.168.4.1/hooke?alpha=' + alphaAux.__str__() + '&beta=' + betaAux.__str__()
-        print(alphaAux.__str__())
-        print(betaAux.__str__())
         print(link)
         try:
 
@@ -130,10 +138,10 @@ class StartPage(tk.Frame):
             json_response = response.json()
             hooke = json_response["hooke"]
             valueAux = hooke
+            msg = 'Distancia obtida (mm): ' + valueAux.__str__()
+            messagebox.showinfo("Distancia", msg)
         except:
             print("Erro ao obter distancia")
-        msg = 'Distancia obtida (mm): ' + valueAux.__str__()
-        messagebox.showinfo("Distancia", msg)
 
     def exit(self):
         self.quit()
@@ -251,6 +259,7 @@ class PageTwo(tk.Frame):
 
     def calculateValues(self):
         self.table.delete(*self.table.get_children())
+        page = self.controller.get_page(StartPage)
         if self.is_empty():
             time_ms = [0]
             dist_mm = [0]
@@ -265,7 +274,7 @@ class PageTwo(tk.Frame):
         self.canvas.draw()
 
         # Termometro
-        theta_1C = tempAux
+        theta_1C = page.tempAux
         theta_1K = theta_1C + 273.15
 
         Rterm = 1
@@ -345,10 +354,11 @@ class PageTwo(tk.Frame):
         self.table.insert("", "end",
                           values=("Desvio relativo (exactidão)", "\u0394 (%)", "%.3f" % desvRel, "-----", "-----"))
 
-        alphaAux = alpha_1
-        print(alphaAux)
-        betaAux = beta_1
-        print(betaAux)
+        page.alphaAux = "%.3f" % alpha_1
+        page.betaAux = "%.3f" % beta_1
+
+        print(page.alphaAux)
+        print(page.betaAux)
 
     def is_empty(self):
         filepath = self.path
