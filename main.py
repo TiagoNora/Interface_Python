@@ -114,12 +114,13 @@ class StartPage(tk.Frame):
             response = requests.get('http://192.168.4.1/temperature')
             json_response = response.json()
             temp = json_response["temperature"]
-            tempAux = temp
+            self.tempAux = temp
             text = "Temp: " + temp
             self.label1.config(text=text)
             self.after(5000, self.change_label1_text)
         except:
             print("Erro ao obter temperatura")
+
 
     def showAlert(self):
         page = self.controller.get_page(StartPage)
@@ -275,6 +276,7 @@ class PageTwo(tk.Frame):
 
         # Termometro
         theta_1C = page.tempAux
+        print(page.tempAux)
         theta_1K = theta_1C + 273.15
 
         Rterm = 1
