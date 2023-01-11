@@ -70,7 +70,7 @@ class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
-        label = tk.Label(self, text="Página Inicial", font=LARGE_FONT)
+        label = tk.Label(self, text="Calibração do Sonar", font=LARGE_FONT)
         label.pack(pady=10, padx=10)
 
         button = tk.Button(self, text="Inserção de dados",
@@ -100,6 +100,7 @@ class StartPage(tk.Frame):
             response = requests.get('http://192.168.4.1/temperature')
             json_response = response.json()
             temp = json_response["temperature"]
+            print(temp)
             tempAux = temp
             text = "Temp: " + temp.__str__()
             self.cont1 += 1
