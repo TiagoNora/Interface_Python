@@ -14,17 +14,18 @@ import os
 LARGE_FONT = ("Lexend", 15)
 SMALL_FONT = ("Lexend", 10)
 my_list = []
-tempAux = 0
+alphaAux = betaAux = tempAux = 0
 
-#my_list.insert(0, [100, 1])
-#my_list.insert(0, [200, 1.5])
-#my_list.insert(0, [300, 2])
-#my_list.insert(0, [400, 2.5])
-#my_list.insert(0, [500, 3])
-#my_list.insert(0, [600, 3.5])
-#my_list.insert(0, [700, 4])
-#my_list.insert(0, [800, 4.5])
-#my_list.insert(0, [900, 5])
+
+# my_list.insert(0, [100, 1])
+# my_list.insert(0, [200, 1.5])
+# my_list.insert(0, [300, 2])
+# my_list.insert(0, [400, 2.5])
+# my_list.insert(0, [500, 3])
+# my_list.insert(0, [600, 3.5])
+# my_list.insert(0, [700, 4])
+# my_list.insert(0, [800, 4.5])
+# my_list.insert(0, [900, 5])
 
 
 # f = open("calibration.dat", "w")
@@ -82,8 +83,12 @@ class StartPage(tk.Frame):
                             command=self.updateFrameAndShow, font=SMALL_FONT)
         button2.place(relx=0.5, rely=0.6, anchor=tk.CENTER)
 
+        button2 = tk.Button(self, text="Medir distancia",
+                            command=self.showAlert, font=SMALL_FONT)
+        button2.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
+
         button3 = tk.Button(self, text="Sair", command=self.exit, font=SMALL_FONT)
-        button3.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
+        button3.place(relx=0.5, rely=0.8, anchor=tk.CENTER)
 
         bottom_frame = tk.Frame(self)
         bottom_frame.pack(side="bottom")
@@ -110,6 +115,19 @@ class StartPage(tk.Frame):
             self.after(5000, self.change_label1_text)
         except:
             print("Erro ao obter temperatura")
+
+    def showAlert(self):
+        valueAux = 0
+        try:
+            link = 'http://192.168.4.1/hooke?alpha= + ' + alphaAux + '&beta=' + betaAux
+            response = requests.get(link)
+            json_response = response.json()
+            hooke = json_response["hooke"]
+            valueAux = hooke
+        except:
+            print("Erro ao obter distancia")
+        msg = 'Distancia obtida (mm): ' + valueAux
+        messagebox.showinfo("Distancia", msg)
 
     def exit(self):
         self.quit()
@@ -307,13 +325,22 @@ class PageTwo(tk.Frame):
         plt.scatter(time_ms, dist_mm, color="black", )
         plt.plot(time_ms, dist_mm, color="blue", linewidth=1)
 
-        self.table.insert("", "end", values=("Tempertura ambiente", "\u03B8 (K)", "%.3f" % theta_1K, "%.3f" % uTheta1, "%.3f" % uRelTheta1))
-        self.table.insert("", "end", values=("Velocidade do som (ref.)", "V_ref (m/s)", "%.3f" % vref, "%.3f" % uVref, "%.3f" % uRelVref))
-        self.table.insert("", "end", values=("Declive da reta", "\u03B1 (mm m/s) ", "%.3f" % alpha_1, "%.3f" % stderr, "%.3f" % relStdErr))
-        self.table.insert("", "end", values=("Ordenada na origem", "\u03B2 (mm)", "%.3f" % beta_1, "%.3f" % intErr, "%.3f" % relIntErr))
+        self.table.insert("", "end", values=(
+        "Tempertura ambiente", "\u03B8 (K)", "%.3f" % theta_1K, "%.3f" % uTheta1, "%.3f" % uRelTheta1))
+        self.table.insert("", "end", values=(
+        "Velocidade do som (ref.)", "V_ref (m/s)", "%.3f" % vref, "%.3f" % uVref, "%.3f" % uRelVref))
+        self.table.insert("", "end", values=(
+        "Declive da reta", "\u03B1 (mm m/s) ", "%.3f" % alpha_1, "%.3f" % stderr, "%.3f" % relStdErr))
+        self.table.insert("", "end", values=(
+        "Ordenada na origem", "\u03B2 (mm)", "%.3f" % beta_1, "%.3f" % intErr, "%.3f" % relIntErr))
         self.table.insert("", "end", values=("Coeficiente de correlação", "r2", "%.3f" % rValue, "-----", "-----"))
-        self.table.insert("", "end", values=("Velocidade do som (exp.)", "V_som (m/s)", "%.3f" % vsom, "%.3f" % (2 * stderr), "%.3f" % relStdErr))
-        self.table.insert("", "end", values=("Desvio relativo (exactidão)", "\u0394 (%)", "%.3f" % desvRel, "-----", "-----"))
+        self.table.insert("", "end", values=(
+        "Velocidade do som (exp.)", "V_som (m/s)", "%.3f" % vsom, "%.3f" % (2 * stderr), "%.3f" % relStdErr))
+        self.table.insert("", "end",
+                          values=("Desvio relativo (exactidão)", "\u0394 (%)", "%.3f" % desvRel, "-----", "-----"))
+
+        alphaAux = alpha_1
+        betaAux = beta_1
 
     def is_empty(self):
         filepath = self.path
